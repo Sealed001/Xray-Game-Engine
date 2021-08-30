@@ -2,10 +2,22 @@
   "name": "xray-game-engine",
   "version": "1.0.0",
   "description": "A javascript game engine based on raylib.",
-  "main": "src/engine.js",
   "author": "Tom ROUET <rouettom.pro@gmail.com>",
+  "homepage": "https://github.com/Sealed001/Xray-Game-Engine",
+  "bugs": "https://github.com/Sealed001/Xray-Game-Engine/issues",
   "license": "GNU GPLv3",
-  "repository": "https://github.com/Sealed001/Xray-Game-Engine",
+  "licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.en.html",
+  "main": "src/engine.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Sealed001/Xray-Game-Engine.git"
+  },
+  "keywords": [
+    "2d",
+    "3d",
+    "game",
+    "javascript"
+  ],
   "dependencies": {
     "lodash": "^4.17.21",
     "raylib": "^0.8.1"
