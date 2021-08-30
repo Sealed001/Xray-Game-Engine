@@ -1,0 +1,12 @@
+{
+  "name": "engine",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/engine.js",
+  "author": "Tom ROUET",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "raylib": "^0.8.1"
+  }
+}
