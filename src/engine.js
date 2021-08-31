@@ -1,64 +1,99 @@
 const raylib = require("raylib");
 const { EventSystemModule, GameObject2D, Scene2D, CircleRenderer, RectangleRenderer } = require("./modules/index");
 
-class Engine {
-    time = 0;
-    deltaTime = 0;
-    window = {
-        _title: "",
-        _size: {
-            width: 0,
-            height: 0
-        },
-        _targetFPS: 0,
-        _fullscreen: false,
+class WindowProperties {
+    _fullscreen = false;
 
-        get title() {
-            return this._title;
-        },
-        set title(value) {
-            this._title = value;
-            raylib.SetWindowTitle(value);
-        },
+    constructor(title, width, height, fullscreen) {
+        this._title = title;
+        this._size = { width, height };
+        this.fullscreen = fullscreen;
+    }
 
-        get size() {
-            if (this._fullscreen) {
-                return { width: raylib.GetMonitorWidth(), height: raylib.GetMonitorHeight() }
-            } else {
-                return this._size;
-            }
-        },
-        set size(value) {
-            this._size = value;
-            if (!this._fullscreen) {
-                raylib.SetWindowSize(value.width, value.height);
-            }
-        },
+    get title() {
+        return this._title;
+    }
+    set title(value) {
+        this._title = value;
+        raylib.SetWindowTitle(value);
+    }
 
-        get targetFPS() {
-            return this._targetFPS;
-        },
-        set targetFPS(value) {
-            this._targetFPS = value;
-            raylib.SetTargetFPS(value);
-        },
-
-        get fullscreen() {
-            return this._fullscreen;
-        },
-        set fullscreen(value) {
-            if (value != this._fullscreen) {
-                this._fullscreen = value;
-                if (value) {
-                    raylib.SetWindowSize(raylib.GetMonitorWidth(0), raylib.GetMonitorHeight(0));
-                } else {
-                    raylib.SetWindowSize(this._size.width, this._size.height);
-                }
-
-                raylib.ToggleFullscreen();
-            }
+    get size() {
+        if (this._fullscreen) {
+            return { width: raylib.GetMonitorWidth(), height: raylib.GetMonitorHeight() }
+        } else {
+            return this._size;
         }
-    };
+    }
+    set size(value) {
+        this._size = value;
+
+        if (!this._fullscreen) {
+            raylib.SetWindowSize(value.width, value.height);
+        }
+    }
+
+    get fullscreen() {
+        return this._fullscreen;
+    }
+    set fullscreen(value) {
+        if (value != this._fullscreen) {
+            this._fullscreen = value;
+
+            if (value) {
+                raylib.SetWindowSize(raylib.GetMonitorWidth(0), raylib.GetMonitorHeight(0));
+            } else {
+                raylib.SetWindowSize(this._size.width, this._size.height);
+            }
+
+            raylib.ToggleFullscreen();
+        }
+    }
+
+    get open() {
+        return !raylib.WindowShouldClose();
+    }
+}
+
+class RenderingProperties {
+    constructor(targetFPS) {
+        this.targetFPS = targetFPS;
+    }
+
+    get targetFPS() {
+        return this._targetFPS;
+    }
+    set targetFPS(value) {
+        this._targetFPS = value;
+        raylib.SetTargetFPS(value);
+    }
+}
+
+class Engine {
+    _raylib = raylib;
+
+    get raylib() {
+        return this._raylib;
+    }
+    get r() {
+        return this._raylib;
+    }
+
+    _deltaTime = 0;
+    get deltaTime() {
+        return this._deltaTime;
+    }
+    get dt() {
+        return this._deltaTime;
+    }
+
+    _time = 0;
+    get time() {
+        return this._time;
+    }
+    get t() {
+        return this._time;
+    }
 
     constructor(modules, properties) {
         // Set Initial Properties
@@ -82,54 +117,67 @@ class Engine {
                 this._modules.push(module);
             }
         });
-
-        // Include Raylib
-        this.raylib = raylib;
     }
     
     run() {
-        // Set Flags
-        if (this._initialProperties.window?.resizable != undefined && this._initialProperties.window.resizable) {
-            raylib.SetConfigFlags(raylib.FLAG_WINDOW_RESIZABLE);
+        let resizable;
+        {
+            // Properties
+            let width = this._initialProperties.window?.size?.width || 960;
+            let height = this._initialProperties.window?.size?.height || 540;
+            let title = this._initialProperties.window?.title || "Raylib Game Engine";
+            let fullscreen = (this._initialProperties.window?.fullscreen != undefined) ? this._initialProperties.window.fullscreen : false;
+            resizable = (this._initialProperties.window?.resizable != undefined) ? this._initialProperties.window.resizable : false;
+            let decorated = (this._initialProperties.window?.decorated != undefined) ? this._initialProperties.window.decorated : true;
+            let transparent = (this._initialProperties.window?.transparent != undefined) ? this._initialProperties.window.transparent : false;
+            let targetFPS = this._initialProperties.rendering?.targetFPS || 60;
+
+            // Flags
+            if (resizable) {
+                raylib.SetConfigFlags(raylib.FLAG_WINDOW_RESIZABLE);
+            }
+            if (!decorated) {
+                raylib.SetConfigFlags(raylib.FLAG_WINDOW_UNDECORATED);
+            }
+            if (transparent) {
+                raylib.SetConfigFlags(raylib.FLAG_WINDOW_TRANSPARENT);
+            }
+
+            // Window
+            raylib.InitWindow(width, height, title);
+            this.window = new WindowProperties(
+                title,
+                width,
+                height,
+                fullscreen
+            );
+
+            // Rendering
+            this.rendering = new RenderingProperties(
+                targetFPS
+            );
         }
 
-        if (this._initialProperties.window?.decorated != undefined && !(this._initialProperties.window.decorated)) {
-            raylib.SetConfigFlags(raylib.FLAG_WINDOW_UNDECORATED);
+        // Cleaning
+        if (this._initialProperties.window != undefined) {
+            delete this._initialProperties.window;
+        }
+        if (this._initialProperties.rendering?.targetFPS != undefined) {
+            delete this._initialProperties.rendering.targetFPS;
         }
 
-        if(this._initialProperties.window?.transparent != undefined && this._initialProperties.window.transparent) {
-            raylib.SetConfigFlags(raylib.FLAG_WINDOW_TRANSPARENT);
-        }
-
-        // Window Initialization
-        let width = this._initialProperties.window?.size?.width || 960;
-        let height = this._initialProperties.window?.size?.height || 540;
-        let title = this._initialProperties.window?.title || "Raylib Game Engine";
-        raylib.InitWindow(width, height, title);
-
-        // Set Window Properties Object Values
-        this.window._title = title;
-        this.window._size = { width, height };
-        this.window.targetFPS = this._initialProperties.window?.targetFPS || 60;
-        if (this._initialProperties.window?.fullscreen != undefined) {
-            this.window.fullscreen = this._initialProperties.window.fullscreen;
-        }
-
-        while (!raylib.WindowShouldClose()) {
+        // Game Loop
+        while (this.window.open) {
             // Update Time
-            this.deltaTime = raylib.GetFrameTime();
-            this.time += this.deltaTime;
+            this._deltaTime = raylib.GetFrameTime();
+            this._time += this._deltaTime;
 
             // Check if the window as been resized
-            if (this._initialProperties.window?.resizable != undefined && this._initialProperties.window.resizable) {
-                if (raylib.IsWindowResized()) {
-                    if (!this.window._fullscreen) {
-                        this.window._size = {
-                            width: raylib.GetScreenWidth(),
-                            height: raylib.GetScreenHeight()
-                        };
-                    }
-                }
+            if (resizable && raylib.IsWindowResized() && !this.window.fullscreen) {
+                this.window._size = {
+                    width: raylib.GetScreenWidth(),
+                    height: raylib.GetScreenHeight()
+                };
             }
 
             // Update Modules
