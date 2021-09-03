@@ -21,7 +21,7 @@ game.run();
 
 ### Properties
 
-#### Window
+#### Window ( Default Properties )
 
 ```js
 properties.window = {
@@ -33,12 +33,19 @@ properties.window = {
     fullscreen: false,
     resizable: false,
     decorated: true,
-    transparent: false,
+    transparent: false
+};
+```
+
+#### Rendering ( Default Properties )
+
+```js
+properties.rendering = {
     targetFPS: 60
 };
 ```
 
-#### Debugger
+#### Debugger  ( Default Properties )
 
 ```js
 properties.debugger = {
