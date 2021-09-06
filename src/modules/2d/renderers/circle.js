@@ -43,7 +43,7 @@ class CircleRenderer {
             color = this.properties.color;
         }
 
-        raylib.DrawCircle(gameObject._position.x + Math.cos(gameObject._rotation) * x, gameObject._position.y - Math.sin(gameObject._rotation) * y, radius, color);
+        raylib.DrawCircle(gameObject._position.x + Math.cos(gameObject._rotation) * x - Math.sin(gameObject._rotation) * -y, gameObject._position.y + Math.sin(gameObject._rotation) * x + Math.cos(gameObject._rotation) * -y, radius, color);
     }
 }
 
