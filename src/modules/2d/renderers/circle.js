@@ -4,6 +4,7 @@ const { defaultsDeep } = require("lodash");
 class CircleRenderer {
     constructor(properties) {
         this.properties = defaultsDeep(properties, {
+            active: true,
             position: {
                 x: 0,
                 y: 0
@@ -14,10 +15,17 @@ class CircleRenderer {
     }
 
     draw(gameObject) {
+        let active;
         let x;
         let y;
         let radius;
         let color;
+
+        if (typeof this.properties.active === "function") {
+            active = this.properties.active.call(gameObject.vars);
+        } else {
+            active = this.properties.active;
+        }
 
         if (typeof this.properties.position.x === "function") {
             x = this.properties.position.x.call(gameObject.vars);
@@ -43,7 +51,9 @@ class CircleRenderer {
             color = this.properties.color;
         }
 
-        raylib.DrawCircle(gameObject._position.x + Math.cos(gameObject._rotation) * x - Math.sin(gameObject._rotation) * -y, gameObject._position.y + Math.sin(gameObject._rotation) * x + Math.cos(gameObject._rotation) * -y, radius, color);
+        if (active) {
+            raylib.DrawCircle(gameObject._position.x + Math.cos(gameObject._rotation) * x - Math.sin(gameObject._rotation) * -y, gameObject._position.y + Math.sin(gameObject._rotation) * x + Math.cos(gameObject._rotation) * -y, radius, color);
+        }
     }
 }
 

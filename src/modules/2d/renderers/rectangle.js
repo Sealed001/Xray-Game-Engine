@@ -4,6 +4,7 @@ const raylib = require("raylib");
 class RectangleRenderer {
     constructor(properties) {
         this.properties = defaultsDeep(properties, {
+            active: true,
             position: {
                 x: 0,
                 y: 0
@@ -18,12 +19,19 @@ class RectangleRenderer {
     }
 
     draw(gameObject) {
+        let active;
         let x;
         let y;
         let width;
         let height;
         let rotation;
         let color;
+
+        if (typeof this.properties.active === "function") {
+            active = this.properties.active.call(gameObject.vars);
+        } else {
+            active = this.properties.active;
+        }
 
         if (typeof this.properties.position.x === "function") {
             x = this.properties.position.x.call(gameObject.vars);
@@ -61,28 +69,30 @@ class RectangleRenderer {
             color = this.properties.color;
         }
 
-        //
-        // 0 1
-        // 2 3
-        //
-
-        let centerCoordinates = new raylib.Vector2(
-            gameObject._position.x + Math.cos(gameObject._rotation) * x - Math.sin(gameObject._rotation) * -y,
-            gameObject._position.y + Math.sin(gameObject._rotation) * x + Math.cos(gameObject._rotation) * -y
-        )
-
-        let points = [];
-        for (let ySign = -1; ySign <= 1; ySign += 2) {
-            for (let xSign = -1; xSign <= 1; xSign += 2) {
-                points.push(new raylib.Vector2(
-                    centerCoordinates.x + Math.cos(gameObject._rotation + rotation) * xSign * width / 2 - Math.sin(gameObject._rotation + rotation) * ySign * height / 2,
-                    centerCoordinates.y + Math.sin(gameObject._rotation + rotation) * xSign * width / 2 + Math.cos(gameObject._rotation + rotation) * ySign * height / 2
-                ));
-            } 
+        if (active) {
+            let centerCoordinates = new raylib.Vector2(
+                gameObject._position.x + Math.cos(gameObject._rotation) * x - Math.sin(gameObject._rotation) * -y,
+                gameObject._position.y + Math.sin(gameObject._rotation) * x + Math.cos(gameObject._rotation) * -y
+            )
+    
+            //
+            // 0 1
+            // 2 3
+            //
+    
+            let points = [];
+            for (let ySign = -1; ySign <= 1; ySign += 2) {
+                for (let xSign = -1; xSign <= 1; xSign += 2) {
+                    points.push(new raylib.Vector2(
+                        centerCoordinates.x + Math.cos(gameObject._rotation + rotation) * xSign * width / 2 - Math.sin(gameObject._rotation + rotation) * ySign * height / 2,
+                        centerCoordinates.y + Math.sin(gameObject._rotation + rotation) * xSign * width / 2 + Math.cos(gameObject._rotation + rotation) * ySign * height / 2
+                    ));
+                } 
+            }
+    
+            raylib.DrawTriangle(points[0], points[2], points[1], color);
+            raylib.DrawTriangle(points[3], points[1], points[2], color);
         }
-
-        raylib.DrawTriangle(points[0], points[2], points[1], color);
-        raylib.DrawTriangle(points[3], points[1], points[2], color);
     }
 }
 
