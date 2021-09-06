@@ -62,17 +62,27 @@ class RectangleRenderer {
         }
 
         //
-        // 1 2
-        // 4 3
+        // 0 1
+        // 2 3
         //
 
-        let point1 = new raylib.Vector2(gameObject._position.x + Math.cos(gameObject._rotation) * (x - Math.cos(rotation) * width / 2), gameObject._position.y - Math.sin(gameObject._rotation) * (y + Math.sin(rotation) * height / 2));
-        let point2 = new raylib.Vector2(gameObject._position.x + Math.cos(gameObject._rotation) * (x + Math.cos(rotation) * width / 2), gameObject._position.y - Math.sin(gameObject._rotation) * (y + Math.sin(rotation) * height / 2));
-        let point3 = new raylib.Vector2(gameObject._position.x + Math.cos(gameObject._rotation) * (x + Math.cos(rotation) * width / 2), gameObject._position.y - Math.sin(gameObject._rotation) * (y - Math.sin(rotation) * height / 2));
-        let point4 = new raylib.Vector2(gameObject._position.x + Math.cos(gameObject._rotation) * (x - Math.cos(rotation) * width / 2), gameObject._position.y - Math.sin(gameObject._rotation) * (y - Math.sin(rotation) * height / 2));
+        let centerCoordinates = new raylib.Vector2(
+            gameObject._position.x + Math.cos(gameObject._rotation) * x - Math.sin(gameObject._rotation) * -y,
+            gameObject._position.y + Math.sin(gameObject._rotation) * x + Math.cos(gameObject._rotation) * -y
+        )
 
-        raylib.DrawTriangle(point1, point4, point2, color);
-        raylib.DrawTriangle(point3, point2, point4, color);
+        let points = [];
+        for (let ySign = -1; ySign <= 1; ySign += 2) {
+            for (let xSign = -1; xSign <= 1; xSign += 2) {
+                points.push(new raylib.Vector2(
+                    centerCoordinates.x + Math.cos(gameObject._rotation + rotation) * xSign * width / 2 - Math.sin(gameObject._rotation + rotation) * ySign * height / 2,
+                    centerCoordinates.y + Math.sin(gameObject._rotation + rotation) * xSign * width / 2 + Math.cos(gameObject._rotation + rotation) * ySign * height / 2
+                ));
+            } 
+        }
+
+        raylib.DrawTriangle(points[0], points[2], points[1], color);
+        raylib.DrawTriangle(points[3], points[1], points[2], color);
     }
 }
 
