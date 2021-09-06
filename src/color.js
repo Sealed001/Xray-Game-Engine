@@ -58,7 +58,7 @@ class Color {
                     } else if (firstValue.charAt(0) === "#" && firstValue.length >= 4) {
                         let color = firstValue.slice(1);
 
-                        if (color.toLowerCase().split('').every(c => c in ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"])) {
+                        if (color.toLowerCase().split('').every(c => ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"].includes(c))) {
                             switch (color.length) {
                                 case 3:
                                     color = `${color}f`;
