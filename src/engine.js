@@ -1,5 +1,6 @@
 const raylib = require("raylib");
 const { EventSystemModule, GameObject2D, Scene2D, CircleRenderer, RectangleRenderer } = require("./modules/index");
+const Color = require("./color");
 
 class WindowProperties {
     _fullscreen = false;
@@ -56,8 +57,9 @@ class WindowProperties {
 }
 
 class RenderingProperties {
-    constructor(targetFPS) {
+    constructor(targetFPS, backgroundColor) {
         this.targetFPS = targetFPS;
+        this.backgroundColor = backgroundColor;
     }
 
     get targetFPS() {
@@ -66,6 +68,17 @@ class RenderingProperties {
     set targetFPS(value) {
         this._targetFPS = value;
         raylib.SetTargetFPS(value);
+    }
+
+    get backgroundColor() {
+        return this._backgroundColor;
+    }
+    get backgroundColorParameter() {
+        return this._backgroundColorParameter;
+    }
+    set backgroundColor(value) {
+        this._backgroundColorParameter = value;
+        this._backgroundColor = new Color(value);
     }
 }
 
@@ -131,6 +144,7 @@ class Engine {
             let decorated = (this._initialProperties.window?.decorated != undefined) ? this._initialProperties.window.decorated : true;
             let transparent = (this._initialProperties.window?.transparent != undefined) ? this._initialProperties.window.transparent : false;
             let targetFPS = this._initialProperties.rendering?.targetFPS || 60;
+            let backgroundColor = this._initialProperties.rendering?.backgroundColor || "black";
 
             // Flags
             if (resizable) {
@@ -154,7 +168,8 @@ class Engine {
 
             // Rendering
             this.rendering = new RenderingProperties(
-                targetFPS
+                targetFPS,
+                backgroundColor
             );
         }
 
@@ -189,7 +204,7 @@ class Engine {
 
             // Draw
             raylib.BeginDrawing();
-                raylib.ClearBackground(raylib.WHITE);
+                raylib.ClearBackground(this.rendering._backgroundColor);
                 this._modules.forEach(module => {
                     if (module.prototype.hasOwnProperty("on2dDraw")) {
                         module.prototype.on2dDraw.call(this);
@@ -206,34 +221,7 @@ class Engine {
 }
 
 module.exports = {
-    colors: {
-        lightgray: raylib.LIGHTGRAY,
-        gray: raylib.GRAY,
-        darkgray: raylib.DARKGRAY,
-        yellow: raylib.YELLOW,
-        gold: raylib.GOLD,
-        orange: raylib.ORANGE,
-        pink: raylib.PINK,
-        red: raylib.RED,
-        maroon: raylib.MAROON,
-        green: raylib.GREEN,
-        lime: raylib.LIME,
-        darkgreen: raylib.DARKGREEN,
-        skyblue: raylib.SKYBLUE,
-        blue: raylib.BLUE,
-        darkblue: raylib.DARKBLUE,
-        purple: raylib.PURPLE,
-        violet: raylib.VIOLET,
-        darkpurple: raylib.DARKPURPLE,
-        beige: raylib.BEIGE,
-        brown: raylib.BROWN,
-        darkbrown: raylib.DARKBROWN,
-        white: raylib.WHITE,
-        black: raylib.BLACK,
-        blank: raylib.BLANK,
-        magenta: raylib.MAGENTA,
-        raywhite: raylib.RAYWHITE
-    },
+    Color,
     Engine,
     EventSystemModule,
     GameObject2D,
